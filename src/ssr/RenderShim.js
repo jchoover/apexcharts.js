@@ -279,7 +279,12 @@ const legendRect = (wrap) => {
         .map((v) => px(v))
       const [mv = 0, mh = mv] = margin
       const fontSize = px(text?.style.fontSize, 14)
-      const label = String(text?.textContent ?? '').replace(/<[^>]*>/g, '')
+      // The browser collapses whitespace in the label's HTML, so a formatter's
+      // indented markup must not count as glyphs.
+      const label = String(text?.textContent ?? '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
       return [
         px(marker?.style.width) +
           1 +

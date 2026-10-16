@@ -109,6 +109,32 @@ describe('SSR legend', () => {
     expect(width(short) - width(long)).toBeGreaterThan(50)
   })
 
+  it('measures a formatter label by its text, not its markup whitespace', async () => {
+    const opts = (formatter) =>
+      line({ legend: { position: 'right', formatter } })
+    const width = (markup) =>
+      parseFloat(
+        /<clipPath id="gridRectMask[^"]*"><rect [^>]*?\swidth="([\d.]+)"/.exec(
+          markup,
+        )[1],
+      )
+
+    const plain = await SSRRenderer.renderToHTML(
+      opts((name) => name),
+      size,
+    )
+    const indented = await SSRRenderer.renderToHTML(
+      opts(
+        (name) => `
+      <div class="label-wrapper">
+        <div class="label">${name}</div>
+      </div>`,
+      ),
+      size,
+    )
+    expect(width(indented)).toBe(width(plain))
+  })
+
   it('wraps a long bottom legend onto more rows', async () => {
     const series = (n) =>
       Array.from({ length: n }, (_, i) => ({
